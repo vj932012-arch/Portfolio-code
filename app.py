@@ -9,7 +9,7 @@ from streamlit_autorefresh import st_autorefresh
 st.set_page_config(page_title="Rotational Strategy Hub", layout="wide")
 st.title("⚡ Dynamic Rotational Growth Screener & Matrix")
 
-# Auto-refresh every 1 HOUR (3,600,000 milliseconds) to prevent Yahoo Finance IP Bans
+# Auto-refresh every 1 HOUR (3,600,000 milliseconds)
 count = st_autorefresh(interval=3600000, limit=100, key="data_refresh")
 
 # 2. Interactive Strategy & Heatmap Legends
@@ -40,21 +40,21 @@ with st.expander("ℹ️ View Strategy Rules & Visual Heatmap Legends", expanded
 
 st.markdown("---")
 
-# 3. Watchlists: Dynamic S&P Fetcher vs. Your Robinhood Portfolio
-@st.cache_data(ttl=86400) # Cache the ticker list for a full 24 hours
-def get_sp250_tickers():
-    # Scrape Wikipedia for the current S&P 500 list
-    url = 'https://en.wikipedia.org/wiki/List_of_S%26P_500_companies'
-    table = pd.read_html(url)[0]
-    tickers = table['Symbol'].tolist()
-    # Clean up ticker symbols for Yahoo (e.g., BRK.B -> BRK-B)
-    tickers = [t.replace('.', '-') for t in tickers]
-    
-    # Return the first 250 for our universe
-    universe = {ticker: ticker for ticker in tickers[:250]}
-    return universe
+# 3. Watchlists: The Top 50 US Mega-Caps vs. Your Robinhood Portfolio
 
-STOCK_UNIVERSE = get_sp250_tickers()
+# Hardcoded Top 50 (Zero scraping required, instant load times!)
+STOCK_UNIVERSE = {
+    "AAPL": "Apple", "MSFT": "Microsoft", "NVDA": "NVIDIA", "GOOGL": "Alphabet", "AMZN": "Amazon",
+    "META": "Meta", "BRK-B": "Berkshire Hathaway", "LLY": "Eli Lilly", "AVGO": "Broadcom", "TSLA": "Tesla",
+    "JPM": "JPMorgan Chase", "WMT": "Walmart", "UNH": "UnitedHealth", "V": "Visa", "XOM": "Exxon Mobil",
+    "MA": "Mastercard", "PG": "Procter & Gamble", "JNJ": "Johnson & Johnson", "COST": "Costco", "HD": "Home Depot",
+    "ORCL": "Oracle", "ABBV": "AbbVie", "BAC": "Bank of America", "CVX": "Chevron", "CRM": "Salesforce",
+    "NFLX": "Netflix", "KO": "Coca-Cola", "MRK": "Merck", "PEP": "PepsiCo", "TMO": "Thermo Fisher",
+    "LIN": "Linde", "ADBE": "Adobe", "DIS": "Disney", "WFC": "Wells Fargo", "CSCO": "Cisco",
+    "MCD": "McDonald's", "AXP": "American Express", "ABT": "Abbott Labs", "INTU": "Intuit", "IBM": "IBM",
+    "QCOM": "Qualcomm", "CAT": "Caterpillar", "TXN": "Texas Instruments", "AMAT": "Applied Materials", "NOW": "ServiceNow",
+    "PFE": "Pfizer", "GE": "GE Aerospace", "GS": "Goldman Sachs", "ISRG": "Intuitive Surgical", "SYK": "Stryker"
+}
 
 ROBINHOOD_PORTFOLIO = {
     "WMT": "Walmart Inc.",
@@ -69,7 +69,7 @@ ROBINHOOD_PORTFOLIO = {
 # 4. Technical Calculation Helpers
 def calculate_rsi(data, window=14):
     if len(data) < window + 1:
-        return 50.0 # Safe default if not enough data
+        return 50.0 
     delta = data['Close'].diff()
     gain = (delta.where(delta > 0, 0)).rolling(window=window).mean()
     loss = (-delta.where(delta < 0, 0)).rolling(window=window).mean()
@@ -77,25 +77,23 @@ def calculate_rsi(data, window=14):
     rsi = 100 - (100 / (1 + rs))
     return rsi.iloc[-1]
 
-# 5. Core Screening Engine (Now with Progress Bar Support!)
-@st.cache_data(ttl=3600) # Caches the massive market pull for 1 Hour
+# 5. Core Screening Engine
+@st.cache_data(ttl=3600)
 def execute_screener(ticker_dictionary, show_progress=False):
     processed_data = []
     total_stocks = len(ticker_dictionary)
     
-    # Initialize Progress UI if requested
-    if show_progress and total_stocks > 50:
+    if show_progress and total_stocks > 10:
         progress_bar = st.progress(0)
         status_text = st.empty()
     
     for i, (ticker_symbol, name) in enumerate(ticker_dictionary.items()):
-        # Update Progress UI
-        if show_progress and total_stocks > 50:
+        if show_progress and total_stocks > 10:
             progress_bar.progress((i + 1) / total_stocks)
-            status_text.text(f"Scanning the market... Fetching {ticker_symbol} ({i+1}/{total_stocks})")
+            status_text.text(f"Scanning Top 50... Fetching {ticker_symbol} ({i+1}/{total_stocks})")
             
         try:
-            time.sleep(0.4) # Slightly faster polite scraper pause
+            time.sleep(0.4) 
             ticker = yf.Ticker(ticker_symbol)
             hist = ticker.history(period="1y", interval="1d")
             
@@ -190,7 +188,7 @@ def execute_screener(ticker_dictionary, show_progress=False):
                 
             processed_data.append({
                 "Ticker": ticker_symbol,
-                "Name": name, # Uses the ticker as the name for the dynamic pool
+                "Name": name, 
                 "Price": current_price,
                 "Rev Growth": rev_growth,
                 "PEG": peg_ratio,
@@ -206,8 +204,7 @@ def execute_screener(ticker_dictionary, show_progress=False):
         except Exception:
             continue
             
-    # Clean up Progress UI
-    if show_progress and total_stocks > 50:
+    if show_progress and total_stocks > 10:
         progress_bar.empty()
         status_text.empty()
         
@@ -268,18 +265,16 @@ def apply_heatmap_styling(target_df):
 tab1, tab2 = st.tabs(["🌎 Broader Market Screener", "🦅 My Robinhood Portfolio"])
 
 with tab1:
-    st.subheader("Market Universe: Top 25 Rotational Picks")
-    st.markdown("Scanning the top 250 U.S. equities dynamically. *Note: Data caches for 1 hour to prevent API limits.*")
+    st.subheader("Market Universe: Top 10 Rotational Picks")
+    st.markdown("Scanning the top 50 U.S. Mega-Cap equities. *Note: Data caches for 1 hour to prevent API limits.*")
     
-    # We pass show_progress=True here so the user sees the 250-stock scan loading
     df_market = execute_screener(STOCK_UNIVERSE, show_progress=True)
     
     eligible_market = df_market[df_market["Eligible"] == True].sort_values(by="Rank Score", ascending=False)
     ejected_market = df_market[df_market["Eligible"] == False]
     
     if not eligible_market.empty:
-        # Changed from head(10) to head(25)
-        st.dataframe(apply_heatmap_styling(eligible_market.head(25)), use_container_width=True, hide_index=True)
+        st.dataframe(apply_heatmap_styling(eligible_market.head(10)), use_container_width=True, hide_index=True)
     
     st.markdown("---")
     st.markdown("**⛔ Active Disqualification Log**")
@@ -291,7 +286,6 @@ with tab2:
     st.subheader("Current Holdings: Live Strategy Check")
     st.markdown("Monitoring your current holdings against rotational fundamentals to determine if they remain structurally sound.")
     
-    # We pass show_progress=False here because 7 stocks will load almost instantly
     df_portfolio = execute_screener(ROBINHOOD_PORTFOLIO, show_progress=False)
     
     if not df_portfolio.empty:
