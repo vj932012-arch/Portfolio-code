@@ -42,7 +42,7 @@ st.markdown("---")
 
 # 3. Watchlists: The Top 50 US Mega-Caps vs. Your Robinhood Portfolio
 
-# Hardcoded Top 50 (Zero scraping required, instant load times!)
+# Hardcoded Top 50
 STOCK_UNIVERSE = {
     "AAPL": "Apple", "MSFT": "Microsoft", "NVDA": "NVIDIA", "GOOGL": "Alphabet", "AMZN": "Amazon",
     "META": "Meta", "BRK-B": "Berkshire Hathaway", "LLY": "Eli Lilly", "AVGO": "Broadcom", "TSLA": "Tesla",
@@ -212,7 +212,8 @@ def execute_screener(ticker_dictionary, show_progress=False):
 
 # 6. Heatmap Styling Engine
 def apply_heatmap_styling(target_df):
-    display_cols = ["Ticker", "Price", "Category", "Buy Triggers / Reasons", "Rev Growth", "PEG", "RSI", "200-Day MA", "FCF Margin"]
+    # ADDED "Name" TO THE DISPLAY COLUMNS LIST HERE
+    display_cols = ["Ticker", "Name", "Price", "Category", "Buy Triggers / Reasons", "Rev Growth", "PEG", "RSI", "200-Day MA", "FCF Margin"]
     if target_df.empty: return target_df
     df_vis = target_df[display_cols].copy()
     
@@ -280,7 +281,7 @@ with tab1:
     st.markdown("**⛔ Active Disqualification Log**")
     if not ejected_market.empty:
         def color_rejections(val): return 'background-color: #fce8e6; color: #a51d24; font-weight: bold;'
-        st.dataframe(ejected_market[["Ticker", "Price", "RSI", "Eject Reason"]].style.format({"Price": "${:,.2f}", "RSI": "{:,.1f}"}).map(color_rejections, subset=['Ticker']), use_container_width=True, hide_index=True)
+        st.dataframe(ejected_market[["Ticker", "Name", "Price", "RSI", "Eject Reason"]].style.format({"Price": "${:,.2f}", "RSI": "{:,.1f}"}).map(color_rejections, subset=['Ticker']), use_container_width=True, hide_index=True)
 
 with tab2:
     st.subheader("Current Holdings: Live Strategy Check")
