@@ -31,7 +31,7 @@ with st.expander("ℹ️ View Strategy Rules & Visual Heatmap Legends", expanded
         | :--- | :--- | :--- | :--- |
         | **Rev. Growth** | >= 20% | 5% to 19.9% | < 5% / Negative |
         | **PEG Ratio** | <= 1.8 | 1.81 to 3.0 | > 3.0 |
-        | **RSI (14-Day)** | 30 to 50 | < 30 or 51 to 75 | > 75 |
+        | **RSI (14-Day)** | 30 to 50 | < 30 or 51 to 80 | > 80 |
         | **200-Day MA** | Price >= MA | *N/A* | Price < MA |
         | **FCF Margin** | >= 10% | 0% to 9.9% | < 0% *(Negative)* |
         """)
