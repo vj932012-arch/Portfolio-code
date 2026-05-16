@@ -57,10 +57,6 @@ STOCK_UNIVERSE = {
 }
 
 ROBINHOOD_PORTFOLIO = {
-    "WMT": "Walmart Inc.",
-    "NFLX": "Netflix Inc.",
-    "SONY": "Sony Group Corp.",
-    "SQ": "Block Inc.",
     "GOOGL": "Alphabet Inc.",
     "TGT": "Target Corp.",
     "VTV": "Vanguard Value ETF"
