@@ -44,7 +44,7 @@ st.markdown("---")
 
 # Hardcoded Top 50
 STOCK_UNIVERSE = {
-    "AAPL": "Apple", "MSFT": "Microsoft", "NVDA": "NVIDIA", "GOOGL": "Alphabet", "AMZN": "Amazon",
+    "AAPL": "Apple", "MSFT": "Microsoft", "NVDA": "NVIDIA", "GOOGL": "Alphabet", "AMZN": "Amazon", "TGT": "Target",
     "META": "Meta", "BRK-B": "Berkshire Hathaway", "LLY": "Eli Lilly", "AVGO": "Broadcom", "TSLA": "Tesla",
     "JPM": "JPMorgan Chase", "WMT": "Walmart", "UNH": "UnitedHealth", "V": "Visa", "XOM": "Exxon Mobil",
     "MA": "Mastercard", "PG": "Procter & Gamble", "JNJ": "Johnson & Johnson", "COST": "Costco", "HD": "Home Depot",
