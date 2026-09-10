@@ -40,9 +40,7 @@ with st.expander("ℹ️ View Strategy Rules & Visual Heatmap Legends", expanded
 
 st.markdown("---")
 
-# 3. Watchlists: The Top 50 US Mega-Caps vs. Your Robinhood Portfolio
-
-# Hardcoded Top 50
+# 3. Watchlist: The Top 50 US Mega-Caps
 STOCK_UNIVERSE = {
     "AAPL": "Apple", "MSFT": "Microsoft", "NVDA": "NVIDIA", "GOOGL": "Alphabet", "AMZN": "Amazon", "TGT": "Target",
     "META": "Meta", "BRK-B": "Berkshire Hathaway", "LLY": "Eli Lilly", "AVGO": "Broadcom", "TSLA": "Tesla",
@@ -54,12 +52,6 @@ STOCK_UNIVERSE = {
     "MCD": "McDonald's", "AXP": "American Express", "ABT": "Abbott Labs", "INTU": "Intuit", "IBM": "IBM",
     "QCOM": "Qualcomm", "CAT": "Caterpillar", "TXN": "Texas Instruments", "AMAT": "Applied Materials", "NOW": "ServiceNow",
     "PFE": "Pfizer", "GE": "GE Aerospace", "GS": "Goldman Sachs", "ISRG": "Intuitive Surgical", "SYK": "Stryker"
-}
-
-ROBINHOOD_PORTFOLIO = {
-    "GOOGL": "Alphabet Inc.",
-    "TGT": "Target Corp.",
-    "VTV": "Vanguard Value ETF"
 }
 
 # 4. Technical Calculation Helpers
@@ -79,14 +71,14 @@ def execute_screener(ticker_dictionary, show_progress=False):
     processed_data = []
     total_stocks = len(ticker_dictionary)
     
-    if show_progress and total_stocks > 10:
+    if show_progress and total_stocks > 0:
         progress_bar = st.progress(0)
         status_text = st.empty()
     
     for i, (ticker_symbol, name) in enumerate(ticker_dictionary.items()):
-        if show_progress and total_stocks > 10:
+        if show_progress and total_stocks > 0:
             progress_bar.progress((i + 1) / total_stocks)
-            status_text.text(f"Scanning Top 50... Fetching {ticker_symbol} ({i+1}/{total_stocks})")
+            status_text.text(f"Scanning Universe... Fetching {ticker_symbol} ({i+1}/{total_stocks})")
             
         try:
             time.sleep(0.4) 
@@ -200,7 +192,7 @@ def execute_screener(ticker_dictionary, show_progress=False):
         except Exception:
             continue
             
-    if show_progress and total_stocks > 10:
+    if show_progress and total_stocks > 0:
         progress_bar.empty()
         status_text.empty()
         
@@ -208,7 +200,6 @@ def execute_screener(ticker_dictionary, show_progress=False):
 
 # 6. Heatmap Styling Engine
 def apply_heatmap_styling(target_df):
-    # ADDED "Name" TO THE DISPLAY COLUMNS LIST HERE
     display_cols = ["Ticker", "Name", "Price", "Category", "Buy Triggers / Reasons", "Rev Growth", "PEG", "RSI", "200-Day MA", "FCF Margin"]
     if target_df.empty: return target_df
     df_vis = target_df[display_cols].copy()
@@ -258,15 +249,13 @@ def apply_heatmap_styling(target_df):
     
     return styled
 
-# 7. Build the Tabbed Interface
-tab1, tab2 = st.tabs(["🌎 Broader Market Screener", "🦅 My Robinhood Portfolio"])
+# 7. Main Dashboard Interface (Tabs Removed)
+st.subheader("🌎 Market Universe: Top 10 Rotational Picks")
+st.markdown("Scanning the top 50 U.S. Mega-Cap equities. *Note: Data caches for 1 hour to prevent API limits.*")
 
-with tab1:
-    st.subheader("Market Universe: Top 10 Rotational Picks")
-    st.markdown("Scanning the top 50 U.S. Mega-Cap equities. *Note: Data caches for 1 hour to prevent API limits.*")
-    
-    df_market = execute_screener(STOCK_UNIVERSE, show_progress=True)
-    
+df_market = execute_screener(STOCK_UNIVERSE, show_progress=True)
+
+if not df_market.empty:
     eligible_market = df_market[df_market["Eligible"] == True].sort_values(by="Rank Score", ascending=False)
     ejected_market = df_market[df_market["Eligible"] == False]
     
@@ -276,18 +265,14 @@ with tab1:
     st.markdown("---")
     st.markdown("**⛔ Active Disqualification Log**")
     if not ejected_market.empty:
+        # Note: Using modern .map() syntax for applying scalar styles to DataFrames 
         def color_rejections(val): return 'background-color: #fce8e6; color: #a51d24; font-weight: bold;'
-        st.dataframe(ejected_market[["Ticker", "Name", "Price", "RSI", "Eject Reason"]].style.format({"Price": "${:,.2f}", "RSI": "{:,.1f}"}).map(color_rejections, subset=['Ticker']), use_container_width=True, hide_index=True)
-
-with tab2:
-    st.subheader("Current Holdings: Live Strategy Check")
-    st.markdown("Monitoring your current holdings against rotational fundamentals to determine if they remain structurally sound.")
-    
-    df_portfolio = execute_screener(ROBINHOOD_PORTFOLIO, show_progress=False)
-    
-    if not df_portfolio.empty:
-        st.dataframe(apply_heatmap_styling(df_portfolio), use_container_width=True, hide_index=True)
-        
-        broken_holdings = df_portfolio[df_portfolio["Eligible"] == False]
-        if not broken_holdings.empty:
-            st.error(f"⚠️ **Warning:** {len(broken_holdings)} of your current holdings have triggered a structural Eject Signal.")
+        st.dataframe(
+            ejected_market[["Ticker", "Name", "Price", "RSI", "Eject Reason"]]
+            .style.format({"Price": "${:,.2f}", "RSI": "{:,.1f}"})
+            .map(color_rejections, subset=['Ticker']), 
+            use_container_width=True, 
+            hide_index=True
+        )
+else:
+    st.warning("No data retrieved. Please check your connection or try again later.")
