@@ -1,9 +1,7 @@
 name: Daily Rotational Screener
 
 on:
-  schedule:
-    # Runs at 20:30 UTC (4:30 PM EDT) Monday through Friday
-    - cron: '30 20 * * 1-5'
+
   workflow_dispatch:
 
 jobs:
