@@ -4,3 +4,4 @@ pandas
 numpy
 streamlit-autorefresh
 lxml
+requests
